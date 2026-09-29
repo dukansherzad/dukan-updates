@@ -67,25 +67,25 @@ jobs:
 
                   const alertPending = data.priceAlertPending === true;
 
-                  console.log(
-                      "Checking:",
-                      child.key,
-                      "Price:",
-                      price,
-                      "Alert pending:",
-alertPending
-                  );
+console.log(
+    "Checking:",
+    child.key,
+    "Price:",
+    price,
+    "Alert pending:",
+    alertPending
+);
 
-                  if (price > 15000 && alertPending) {
+if (price > 15000 && alertPending) {
 
-                      updates[child.key + "/priceAlertPending"] = false;
+    updates[child.key + "/priceAlertPending"] = false;
 
-                      console.log(
-                          "PRICE ABOVE 15,000:",
-                          child.key,
-                          price
-                      );
-                  }
+    console.log(
+        "PRICE ABOVE 15,000:",
+        child.key,
+        price
+    );
+}
               });
 
               if (Object.keys(updates).length === 0) {
