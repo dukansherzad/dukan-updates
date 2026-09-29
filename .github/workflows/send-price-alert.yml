@@ -93,8 +93,6 @@ if (price > 15000 && alertPending) {
                   return;
               }
 
-              await db.ref("Qarzakan").update(updates);
-
               const message = {
                   topic: "price_alerts",
 
@@ -110,9 +108,11 @@ if (price > 15000 && alertPending) {
 
               await admin.messaging().send(message);
 
-              console.log(
-                  "FCM notification sent successfully."
-              );
+await db.ref("Qarzakan").update(updates);
+
+console.log(
+    "FCM notification sent successfully."
+);
           }
 
           main()
