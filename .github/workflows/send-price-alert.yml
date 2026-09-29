@@ -1,1 +1,126 @@
 
+name: Dukan Price Alert
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+jobs:
+  check-price:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Firebase Admin
+        run: npm install firebase-admin
+
+      - name: Check Firebase and send notification
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          DATABASE_URL: https://sherzaddukan2025-default-rtdb.firebaseio.com
+        run: |
+          cat > check-price.js <<'EOF'
+          const admin = require("firebase-admin");
+
+          const serviceAccount =
+              JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+
+          admin.initializeApp({
+              credential: admin.credential.cert(serviceAccount),
+              databaseURL: process.env.DATABASE_URL
+          });
+
+          const db = admin.database();
+
+          async function main() {
+
+              const snapshot = await db.ref("Qarzakan").once("value");
+
+              if (!snapshot.exists()) {
+                  console.log("No Qarzakan data found.");
+                  return;
+              }
+
+              const updates = {};
+
+              snapshot.forEach((child) => {
+
+                  const data = child.val();
+
+                  if (!data) {
+                      return;
+                  }
+
+                  const price = Number(
+                      String(data.text2 || "")
+                          .replace(/,/g, "")
+                          .trim()
+                  );
+
+                  const alreadySent = data.priceAlertSent === true;
+
+                  console.log(
+                      "Checking:",
+                      child.key,
+                      "Price:",
+                      price,
+                      "Already sent:",
+                      alreadySent
+                  );
+
+                  if (price > 15000 && !alreadySent) {
+
+                      updates[child.key + "/priceAlertSent"] = true;
+
+                      console.log(
+                          "PRICE ABOVE 15,000:",
+                          child.key,
+                          price
+                      );
+                  }
+              });
+
+              if (Object.keys(updates).length === 0) {
+                  console.log("No new price alerts.");
+                  return;
+              }
+
+              await db.ref("Qarzakan").update(updates);
+
+              const message = {
+                  topic: "price_alerts",
+
+                  notification: {
+                      title: "Dukan",
+                      body: "ئاگاداری: بڕی قەرز لە ١٥,٠٠٠ دینار زیاترە"
+                  },
+
+                  data: {
+                      type: "price_alert"
+                  }
+              };
+
+              await admin.messaging().send(message);
+
+              console.log(
+                  "FCM notification sent successfully."
+              );
+          }
+
+          main()
+              .then(() => process.exit(0))
+              .catch((error) => {
+                  console.error(error);
+                  process.exit(1);
+              });
+          EOF
+
+          node check-price.js
