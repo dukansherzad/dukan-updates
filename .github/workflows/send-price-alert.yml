@@ -96,7 +96,7 @@ jobs:
                   topic: "price_alerts",
 
                   notification: {
-                      title: "Dukan",
+                      title: "قەزری زۆربوو",
                       body: "ئاگاداری: یەکێک لە قەرزارەکان زیاتر لە 15,000 قەرزارە"
                   },
 
