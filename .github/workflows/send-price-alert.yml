@@ -65,7 +65,7 @@ jobs:
                           .trim()
                   );
 
-                  const alreadySent = data.priceAlertSent === true;
+                  const alertPending = data.priceAlertPending === true;
 
                   console.log(
                       "Checking:",
@@ -76,9 +76,9 @@ jobs:
                       alreadySent
                   );
 
-                  if (price > 15000 && !alreadySent) {
+                  if (price > 15000 && alertPending) {
 
-                      updates[child.key + "/priceAlertSent"] = true;
+                      updates[child.key + "/priceAlertPending"] = false;
 
                       console.log(
                           "PRICE ABOVE 15,000:",
