@@ -72,8 +72,8 @@ jobs:
                       child.key,
                       "Price:",
                       price,
-                      "Already sent:",
-                      alreadySent
+                      "Alert pending:",
+alertPending
                   );
 
                   if (price > 15000 && alertPending) {
